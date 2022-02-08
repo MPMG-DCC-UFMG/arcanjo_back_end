@@ -14,6 +14,7 @@ export default class MainRouter {
         this.router = Router({ mergeParams: true });
 
         this.authRoutes();
+        this.userRegisterRoutes();
 
         this.router.use(authMiddleware.validateToken);
 
@@ -38,12 +39,18 @@ export default class MainRouter {
 
     }
 
+    private userRegisterRoutes() {
+        const userController = new UserController();
+
+        this.router.route('/users')
+            .post((req: Request, res: Response) => userController.create(req, res));
+    }
+
     private userRoutes() {
         const userController = new UserController();
 
         this.router.route('/users')
-            .get((req: Request, res: Response) => userController.readAll(req, res))
-            .post((req: Request, res: Response) => userController.create(req, res));
+            .get((req: Request, res: Response) => userController.readAll(req, res));
 
         this.router.route('/users/:id')
             .get((req: Request, res: Response) => userController.read(req, res))

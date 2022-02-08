@@ -20,12 +20,14 @@ export class UserController {
     async read(req: Request, res: Response) {
         try {
             const id: number | string = req.params.id;
+            console.log(id);
             const user = await this.userService.getById(id === "me" ? req.body.user.id : id);
             if (user)
                 res.json(user);
             else
                 res.sendStatus(404)
         } catch (err) {
+            console.log(err);
             res.status(400).json(err);
         }
     }

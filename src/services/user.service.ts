@@ -14,6 +14,14 @@ export class UserService {
         }
     }
 
+    async count(): Promise<number> {
+        try {
+            return await User.count();
+        } catch (err) {
+            throw err;
+        }
+    }
+
     async getById(id: number | string): Promise<UserInterface | null> {
         try {
             return await User.findByPk(id);
@@ -34,6 +42,9 @@ export class UserService {
 
     async create(user: UserInterface): Promise<UserInterface> {
         try {
+            if (await this.count() === 0)
+                user.role = 'admin';
+
             return await User.create(user);
         } catch (err) {
             throw ErrorHandling.fixSequelizeErrors(err);
