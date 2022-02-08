@@ -1,0 +1,139 @@
+version: 2.1
+orbs:
+  gcp-cli: circleci/gcp-cli@2.2.0
+  node: circleci/node@1.1.6
+attach-workspace: &attach-workspace
+  attach_workspace:
+    at: ~/repo
+aliases:
+  - &filter-only-main
+    branches:
+      only:
+        - main
+
+jobs:
+  build:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run: npm install
+
+  test:
+    docker:
+      - image: circleci/node:14.4.0
+      - image: circleci/postgres:12.1-alpine
+        environment:
+          POSTGRES_DB: db_name
+          POSTGRES_PASSWORD: db_pass
+          POSTGRES_USER: db_user
+    steps:
+      - checkout
+      - node/with-cache:
+          steps:
+            - run:
+                name: Wait for Postgres to start
+                command: dockerize -wait tcp://localhost:5432 -timeout 1m
+            - run: npm install
+            - run: npm test
+
+  semgrep-scan:
+    parameters:
+      repo_path:
+        type: string
+        default: <REPLACE REPO URL>
+      default_branch:
+        type: string
+        default: main
+    environment:
+      SEMGREP_RULES: >-
+        p/security-audit
+        p/secrets
+      SEMGREP_BASELINE_REF: main
+    docker:
+      - image: returntocorp/semgrep-agent:v1
+    steps:
+      - checkout
+      - run:
+          name: "Semgrep scan"
+          command: semgrep-agent
+
+  trufflehog:
+    docker:
+      - image: python:3-alpine
+    steps:
+      - checkout
+      - run:
+          name: install trufflehog
+          command: apk add --no-cache git && pip install gitdb2==3.0.0 trufflehog
+      - run:
+          name: run trufflehog
+          command: trufflehog --exclude_paths trufflehog/exclude-patterns.txt --allow trufflehog/allow.json .
+
+  deploy_to_staging:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run:
+          name: Generate OKTA Credentials file
+          command: echo $OKTA_METADATA_STAGING > ./oktaMetadata.xml
+      - run:
+          name: Installing Google Cloud SDK
+          command: |
+            sudo echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && sudo apt-get update -y && sudo apt-get install google-cloud-sdk -y
+
+      - gcp-cli/initialize
+      - gcp-cli/install
+      - run:
+          name: Push image to GCP
+          command: |
+            stty rows 50 cols 80
+            gcloud app deploy staging.yaml
+
+  deploy_to_production:
+    executor:
+      name: node/default
+    steps:
+      - checkout
+      - run:
+          name: Installing Google Cloud SDK
+          command: |
+            sudo echo "deb [signed-by=/usr/share/keyrings/cloud.google.gpg] http://packages.cloud.google.com/apt cloud-sdk main" | sudo tee -a /etc/apt/sources.list.d/google-cloud-sdk.list && curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key --keyring /usr/share/keyrings/cloud.google.gpg  add - && sudo apt-get update -y && sudo apt-get install google-cloud-sdk -y
+      - gcp-cli/initialize
+      - gcp-cli/install
+      - run:
+          name: Push image to GCP
+          command: |
+            stty rows 50 cols 80
+            gcloud app deploy app.yaml
+
+
+workflows:
+  gcp_deploy:
+    jobs:
+      - build
+      - test:
+          requires:
+            - build
+      - semgrep-scan:
+          requires:
+            - test
+      - trufflehog:
+          requires:
+            - test
+      - deploy_to_staging:
+          requires:
+            - semgrep-scan
+            - trufflehog
+          filters: *filter-only-main
+      - approve_deploy_to_production:
+          type: approval
+          requires:
+            - deploy_to_staging
+          filters: *filter-only-main
+      - deploy_to_production:
+          requires:
+            - approve_deploy_to_production

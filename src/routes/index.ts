@@ -1,0 +1,74 @@
+import { Request, Response } from 'express';
+import { Router } from 'express';
+import { AnalysisController } from '../controllers/analysis.controller';
+import { AuthController } from '../controllers/auth.controller';
+import { DirectorySelectorController } from '../controllers/directorySelect.controller';
+import { UserController } from '../controllers/user.controller';
+import { AuthMiddleware } from '../middlewares/auth.middleware';
+
+export default class MainRouter {
+
+    router: Router;
+
+    constructor(private authMiddleware = new AuthMiddleware()) {
+        this.router = Router({ mergeParams: true });
+
+        this.authRoutes();
+
+        this.router.use(authMiddleware.validateToken);
+
+        this.userRoutes();
+        this.analysisRoutes();
+        this.dirSelectRoutes();
+    }
+
+    private authRoutes() {
+        const authController = new AuthController();
+
+        this.router.route('/login')
+            .post((req: Request, res: Response) => authController.login(req, res));
+
+    }
+
+    private dirSelectRoutes() {
+        const dirController = new DirectorySelectorController();
+
+        this.router.route('/dir')
+            .get((req: Request, res: Response) => dirController.getDir(req, res));
+
+    }
+
+    private userRoutes() {
+        const userController = new UserController();
+
+        this.router.route('/users')
+            .get((req: Request, res: Response) => userController.readAll(req, res))
+            .post((req: Request, res: Response) => userController.create(req, res));
+
+        this.router.route('/users/:id')
+            .get((req: Request, res: Response) => userController.read(req, res))
+            .put((req: Request, res: Response) => userController.update(req, res))
+            .delete((req: Request, res: Response) => userController.delete(req, res));
+    }
+
+    private analysisRoutes() {
+        const analysisController = new AnalysisController();
+
+        this.router.route('/analysis')
+            .get((req: Request, res: Response) => analysisController.readAll(req, res))
+            .post((req: Request, res: Response) => analysisController.create(req, res));
+
+        this.router.route('/analysis/:id')
+            .get((req: Request, res: Response) => analysisController.read(req, res))
+            .put((req: Request, res: Response) => analysisController.update(req, res))
+            .delete((req: Request, res: Response) => analysisController.delete(req, res));
+
+        this.router.route('/analysis/:id/process')
+            .post((req: Request, res: Response) => analysisController.process(req, res))
+
+        this.router.route('/analysis/:id/report')
+            .get((req: Request, res: Response) => analysisController.report(req, res))
+    }
+
+
+}
