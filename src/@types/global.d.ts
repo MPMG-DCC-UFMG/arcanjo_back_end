@@ -8,6 +8,17 @@ declare global {
     email: string;
   }
 
+  export interface AnalysisReportInterface {
+    id: number;
+    file: string;
+    hash: string;
+    nsfw: string;
+    faces: number;
+    ages: string;
+    children: number;
+    classification: string;
+  }
+
   export interface AnalysisInterface {
     id?: number;
     name: string;
@@ -21,6 +32,8 @@ declare global {
     log: string;
     status: string;
   }
+
+
 
   export interface UpdateResponse {
     updatedRows: number

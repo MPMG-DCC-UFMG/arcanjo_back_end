@@ -85,6 +85,13 @@ export class AnalysisService {
             }
         });
 
-        return result.Sheet1;
+        const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
+            ...item,
+            ...{
+                file: item.file.replace("/m08/storage/", "")
+            }
+        }));
+
+        return response;
     }
 }

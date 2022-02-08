@@ -3,6 +3,7 @@ import { Router } from 'express';
 import { AnalysisController } from '../controllers/analysis.controller';
 import { AuthController } from '../controllers/auth.controller';
 import { DirectorySelectorController } from '../controllers/directorySelect.controller';
+import { StorageController } from '../controllers/storage.controller';
 import { UserController } from '../controllers/user.controller';
 import { AuthMiddleware } from '../middlewares/auth.middleware';
 
@@ -15,6 +16,7 @@ export default class MainRouter {
 
         this.authRoutes();
         this.userRegisterRoutes();
+        this.storageRoutes();
 
         this.router.use(authMiddleware.validateToken);
 
@@ -28,6 +30,14 @@ export default class MainRouter {
 
         this.router.route('/login')
             .post((req: Request, res: Response) => authController.login(req, res));
+
+    }
+
+    private storageRoutes() {
+        const storageController = new StorageController();
+
+        this.router.route('/storage')
+            .get((req: Request, res: Response) => storageController.getFile(req, res));
 
     }
 
