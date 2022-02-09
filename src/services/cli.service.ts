@@ -7,7 +7,7 @@ const cliDir = process.env.CLI_DIR;
 export class CliService {
 
     DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"{PATH}:/m08/storage\"", "-v", __dirname + "../../results:/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t imagens -o /m08/results\""];
-    CLI_COMMAND: string[] = ["python3", `${cliDir}run.py`, "-p", "{PATH}", "-i", "{ID}", "-t", "imagens", "-o", resultsDir];
+    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`, "-p", "{PATH}", "-i", "{ID}", "-t", "imagens", "-o", resultsDir];
 
     constructor(
         private analysisService = new AnalysisService()
