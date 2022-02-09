@@ -64,3 +64,4 @@ dbdata/
 # Distribution directory
 dist
 src/results
+results

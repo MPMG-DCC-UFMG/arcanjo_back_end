@@ -21,8 +21,11 @@ services:
     environment:
       - DB_HOST=postgresql
       - DIR_PREFIX=/storage/
+      - CLI_DIR=/m08/
+      - RESULTS_DIR=/results
     volumes:
       - "D:/:/storage"
+      - "./results:/results"
     ports:
       - "4545:4545"
     restart: always

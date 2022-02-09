@@ -62,7 +62,8 @@ export class AnalysisService {
     }
 
     report(id: number | string) {
-        const dir = `${__dirname}/../results/ID_${id}`;
+        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../results`;
+        const dir = `${resultsDir}/ID_${id}`;
         const files = fs.readdirSync(dir);
         const xlsx = files.find(file => file.indexOf(".xlsx") >= 0);
 
@@ -85,10 +86,11 @@ export class AnalysisService {
             }
         });
 
+        const dirPrefix = process.env.DIR_PREFIX || "";
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
             ...{
-                file: item.file.replace("/m08/storage/", "")
+                file: item.file.replace(dirPrefix, "")
             }
         }));
 
