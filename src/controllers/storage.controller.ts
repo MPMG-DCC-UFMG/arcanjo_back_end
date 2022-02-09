@@ -20,8 +20,9 @@ export class StorageController {
 
     async getFile(req: Request, res: Response) {
         try {
+            const dirPrefix = process.env.DIR_PREFIX || "";
             if (req.query.file)
-                res.sendFile(req.query.file.toString());
+                res.sendFile(dirPrefix + req.query.file.toString());
             else
                 res.sendStatus(400)
         } catch {

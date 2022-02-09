@@ -11,4 +11,33 @@ services:
     volumes:
       - ./dbdata:/var/lib/postgresql/data
     restart: always
+    networks:
+      - default
 
+  back:
+    image: arcanjo-back
+    depends_on:
+      - postgresql
+    environment:
+      - DB_HOST=postgresql
+      - DIR_PREFIX=/storage/
+    volumes:
+      - "D:/:/storage"
+    ports:
+      - "4545:4545"
+    restart: always
+    networks:
+      - default
+
+  front:
+    image: arcanjo-front
+    depends_on:
+      - back
+    ports:
+      - "80:80"
+    restart: always
+    networks:
+      - default
+
+networks:
+  default:
