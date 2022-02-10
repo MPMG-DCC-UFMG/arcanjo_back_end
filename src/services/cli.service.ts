@@ -7,7 +7,16 @@ const cliDir = process.env.CLI_DIR;
 export class CliService {
 
     DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"{PATH}:/m08/storage\"", "-v", __dirname + "../../results:/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t {TYPE} -o /m08/results\""];
-    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`, "-p", "{PATH}", "-i", "{ID}", "-t", "{TYPE}", "-o", resultsDir];
+    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`, 
+        "-p", "{PATH}", 
+        "-i", "{ID}", 
+        "-t", "{TYPE}", 
+        "--age", "{AGE}", 
+        "--face", "{FACE}", 
+        "--child", "{CHILD}", 
+        "--nsfw", "{NSFW}", 
+        "-o", resultsDir
+    ];
 
     constructor(
         private analysisService = new AnalysisService()
@@ -27,6 +36,10 @@ export class CliService {
             const command: string[] = this.getCommand().map(c => c
                 .replace("{PATH}", finalPath)
                 .replace("{ID}", `ID_${analysis.id}`)
+                .replace("{FACE}", analysis.face_threshold.toString())
+                .replace("{CHILD}", analysis.child_threshold.toString())
+                .replace("{AGE}", analysis.age_threshold.toString())
+                .replace("{NSFW}", analysis.porn_threshold.toString())
                 .replace("{TYPE}", this.getType(analysis))
             );
 
