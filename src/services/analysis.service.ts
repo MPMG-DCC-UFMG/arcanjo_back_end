@@ -64,6 +64,7 @@ export class AnalysisService {
     report(id: number | string) {
         const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../results`;
         const dir = `${resultsDir}/ID_${id}`;
+        console.log(`Results dir: ${dir}`);
         const files = fs.readdirSync(dir);
         const xlsx = files.find(file => file.indexOf(".xlsx") >= 0);
 
@@ -90,7 +91,7 @@ export class AnalysisService {
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
             ...{
-                file: item.file.replace(dirPrefix, "")
+                file: item.file.replace(dirPrefix, "/")
             }
         }));
 
