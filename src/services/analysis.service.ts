@@ -68,6 +68,8 @@ export class AnalysisService {
         const files = fs.readdirSync(dir);
         const xlsx = files.find(file => file.indexOf(".xlsx") >= 0);
 
+        console.log(xlsx);
+
         if (!xlsx) throw "Not found";
 
         const result = excelToJson({
@@ -87,13 +89,20 @@ export class AnalysisService {
             }
         });
 
+        console.log(result);
+
         const dirPrefix = process.env.DIR_PREFIX || "";
+
+        console.log(dirPrefix);
+
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
             ...{
                 file: item.file.replace(dirPrefix, "/")
             }
         }));
+
+        console.log(response);
 
         return response;
     }
