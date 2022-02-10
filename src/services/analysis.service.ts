@@ -64,12 +64,8 @@ export class AnalysisService {
     report(id: number | string) {
         const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../results`;
         const dir = `${resultsDir}/ID_${id}`;
-        console.log(`Results dir: ${dir}`);
         const files = fs.readdirSync(dir);
         const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1);
-
-        console.log(files);
-        console.log(xlsx);
 
         if (!xlsx) throw "Not found";
 
@@ -90,11 +86,9 @@ export class AnalysisService {
             }
         });
 
-        console.log(result);
 
         const dirPrefix = process.env.DIR_PREFIX || "";
 
-        console.log(dirPrefix);
 
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
@@ -103,7 +97,6 @@ export class AnalysisService {
             }
         }));
 
-        console.log(response);
 
         return response;
     }
