@@ -3,6 +3,7 @@ declare global {
   export interface UserInterface {
     id?: number;
     role: "user" | "admin";
+    active: boolean;
     name: string;
     password: string;
     email: string;

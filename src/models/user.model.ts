@@ -40,6 +40,10 @@ export const User: sequelize.Model<UserInterface, {}> = databaseInstance.define<
         set(this: any, value: string) {
             this.setDataValue('password', bcrypt.hashSync(value, saltRounds));
         }
+    },
+    active: {
+        type: sequelize.BOOLEAN,
+        defaultValue: false
     }
 }, {
     timestamps: true

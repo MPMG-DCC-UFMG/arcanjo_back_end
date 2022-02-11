@@ -19,9 +19,15 @@ export class AuthController {
             return;
         }
 
+        if (user && !user.active) {
+            this.userUnauthorized(res);
+            return;
+        }
+
         if (user && bcrypt.compareSync(password, user.password)) {
             const token = AuthService.generateToken(user);
             res.json({ token });
+            return;
         }
 
         this.userNotFound(res);
@@ -30,6 +36,10 @@ export class AuthController {
 
     userNotFound(res: Response) {
         res.status(404).json({ message: ["Usuário e/ou senha inválido"] });
+    }
+
+    userUnauthorized(res: Response) {
+        res.status(401).json({ message: ["Usuário ainda não aprovado pelo administrador"] });
     }
 
 }

@@ -42,8 +42,10 @@ export class UserService {
 
     async create(user: UserInterface): Promise<UserInterface> {
         try {
-            if (await this.count() === 0)
+            if (await this.count() === 0) {
                 user.role = 'admin';
+                user.active = true;
+            }
 
             return await User.create(user);
         } catch (err) {

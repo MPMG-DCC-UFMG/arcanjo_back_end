@@ -62,7 +62,7 @@ export class AnalysisService {
     }
 
     report(id: number | string) {
-        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../results`;
+        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
         const dir = `${resultsDir}/ID_${id}`;
         const files = fs.readdirSync(dir);
         const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1);
