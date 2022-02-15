@@ -39,6 +39,9 @@ export default class MainRouter {
         this.router.route('/storage')
             .get((req: Request, res: Response) => storageController.getFile(req, res));
 
+        this.router.route('/storage/report/:id')
+            .get((req: Request, res: Response) => storageController.getReport(req, res));
+
     }
 
     private dirSelectRoutes() {

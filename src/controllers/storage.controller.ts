@@ -30,4 +30,19 @@ export class StorageController {
         }
     }
 
+    async getReport(req: Request, res: Response) {
+        try {
+            const { id } = req.params;
+            const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
+            const dir = `${resultsDir}/ID_${id}`;
+            const files = fs.readdirSync(dir);
+            const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1);
+
+            res.download(path.resolve(`${dir}/${xlsx}`));
+        } catch (e) {
+            console.log(e);
+            res.sendStatus(400);
+        }
+    }
+
 }
