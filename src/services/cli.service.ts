@@ -15,6 +15,7 @@ export class CliService {
         "--face", "{FACE}", 
         "--child", "{CHILD}", 
         "--nsfw", "{NSFW}", 
+        "--user", "{USER}", 
         "-o", resultsDir
     ];
 
@@ -26,7 +27,7 @@ export class CliService {
         return cliDir ? this.CLI_COMMAND : this.DOCKER_COMMAND;
     }
 
-    async processAnalysis(id: number | string) {
+    async processAnalysis(id: number | string, user: string = "") {
         const dirPrefix = process.env.DIR_PREFIX || "";
         const analysis = await this.analysisService.getById(id);
 
@@ -41,6 +42,7 @@ export class CliService {
                 .replace("{AGE}", analysis.age_threshold.toString())
                 .replace("{NSFW}", analysis.porn_threshold.toString())
                 .replace("{TYPE}", this.getType(analysis))
+                .replace("{USER}", user)
             );
 
             this.changeAnalysisStatus(id, "processing")

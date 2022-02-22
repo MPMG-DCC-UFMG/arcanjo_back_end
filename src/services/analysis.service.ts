@@ -56,9 +56,9 @@ export class AnalysisService {
         }
     }
 
-    async process(id: number | string) {
+    async process(id: number | string, user: string) {
         const cliService = new CliService();
-        cliService.processAnalysis(id);
+        cliService.processAnalysis(id, user);
     }
 
     report(id: number | string) {

@@ -57,7 +57,7 @@ export class AnalysisController {
 
     async process(req: Request, res: Response) {
         try {
-            const response = this.analysisService.process(req.params.id);
+            const response = this.analysisService.process(req.params.id, req.body.user.name);
             res.sendStatus(200);
         } catch (err) {
             res.status(400).json(err);
