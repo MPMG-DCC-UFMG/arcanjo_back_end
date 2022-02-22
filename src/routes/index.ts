@@ -35,12 +35,17 @@ export default class MainRouter {
 
     private storageRoutes() {
         const storageController = new StorageController();
+        const analysisController = new AnalysisController();
 
         this.router.route('/storage')
             .get((req: Request, res: Response) => storageController.getFile(req, res));
 
         this.router.route('/storage/report/:id')
             .get((req: Request, res: Response) => storageController.getReport(req, res));
+
+
+        this.router.route('/analysis/:id/report/download')
+            .get((req: Request, res: Response) => analysisController.exportReport(req, res))
 
     }
 
@@ -88,6 +93,7 @@ export default class MainRouter {
 
         this.router.route('/analysis/:id/report')
             .get((req: Request, res: Response) => analysisController.report(req, res))
+
     }
 
 

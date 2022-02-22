@@ -72,4 +72,14 @@ export class AnalysisController {
             res.status(400).json(err);
         }
     }
+
+    async exportReport(req: Request, res: any) {
+        try {
+            const response = this.analysisService.filteredReport(req.params.id, req.query.ids ? req.query.ids.toString().split(",") : []);
+            const report = await this.analysisService.getById(req.params.id);
+            res.xls(`Relatório ${report?.name}.xlsx`, response);
+        } catch (err) {
+            res.status(400).json(err);
+        }
+    }
 }

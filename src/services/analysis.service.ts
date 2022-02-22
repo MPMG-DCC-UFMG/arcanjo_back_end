@@ -86,9 +86,7 @@ export class AnalysisService {
             }
         });
 
-
         const dirPrefix = process.env.DIR_PREFIX || "";
-
 
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
@@ -99,5 +97,16 @@ export class AnalysisService {
 
 
         return response;
+    }
+
+    filteredReport(id: number | string, ids?: string[]) {
+        let data: any[] = this.report(id);
+
+        console.log(ids);
+
+        if (ids && ids.length > 0)
+            data = data.filter(d => ids.indexOf(d.id.toString()) >= 0)
+
+        return data;
     }
 }
