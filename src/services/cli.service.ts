@@ -1,6 +1,7 @@
 import { exec } from 'child_process';
 import { AnalysisService } from './analysis.service';
 
+const accents = require('remove-accents');
 const resultsDir = process.env.RESULTS_DIR || "/m08/results";
 const cliDir = process.env.CLI_DIR;
 
@@ -42,7 +43,7 @@ export class CliService {
                 .replace("{AGE}", analysis.age_threshold.toString())
                 .replace("{NSFW}", analysis.porn_threshold.toString())
                 .replace("{TYPE}", this.getType(analysis))
-                .replace("{USER}", user)
+                .replace("{USER}", accents.remove(user))
             );
 
             this.changeAnalysisStatus(id, "processing")
