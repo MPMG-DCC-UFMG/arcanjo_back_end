@@ -31,13 +31,18 @@ services:
     restart: always
     networks:
       - default
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - capabilities: [ gpu ]
 
   front:
     image: arcanjo-front
     depends_on:
       - back
     ports:
-      - "80:80"
+      - "9090:80"
     restart: always
     networks:
       - default
