@@ -15,7 +15,7 @@ export class CliService {
         "--face", "{FACE}", 
         "--child", "{CHILD}", 
         "--nsfw", "{NSFW}", 
-        "--user", "{USER}", 
+        "--user", "\"{USER}\"", 
         "-o", resultsDir
     ];
 
