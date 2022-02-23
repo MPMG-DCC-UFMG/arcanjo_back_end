@@ -21,8 +21,9 @@ export class StorageController {
     async getFile(req: Request, res: Response) {
         try {
             const dirPrefix = process.env.DIR_PREFIX || "";
+            const removeStoragePrefix = Boolean(req.query.removeStoragePrefix);
             if (req.query.file)
-                res.sendFile(dirPrefix + req.query.file.toString());
+                res.sendFile(`${removeStoragePrefix ? "" : dirPrefix}${req.query.file.toString()}`);
             else
                 res.sendStatus(400)
         } catch {
