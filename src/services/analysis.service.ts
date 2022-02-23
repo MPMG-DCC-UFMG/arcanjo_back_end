@@ -62,12 +62,22 @@ export class AnalysisService {
     }
 
     report(id: number | string) {
+        const images = this.imageReport(id);
+        const videos = this.videoReport(id, images.length);
+
+        return [
+            ...images,
+            ...videos
+        ]
+    }
+
+    imageReport(id: number | string) {
         const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
         const dir = `${resultsDir}/ID_${id}`;
         const files = fs.readdirSync(dir);
-        const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1);
+        const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1 && file.indexOf("imagens") > 1);
 
-        if (!xlsx) throw "Not found";
+        if (!xlsx) return [];
 
         const result = excelToJson({
             sourceFile: `${dir}/${xlsx}`,
@@ -91,7 +101,45 @@ export class AnalysisService {
         const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
             ...item,
             ...{
-                file: item.file.replace(dirPrefix, "/")
+                file: item.file.replace(dirPrefix, "/"),
+                type: "image"
+            }
+        }));
+
+        return response;
+    }
+
+    videoReport(id: number | string, idOffset: number = 0) {
+        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
+        const dir = `${resultsDir}/ID_${id}`;
+        const files = fs.readdirSync(dir);
+        const xlsx = files.find(file => file.indexOf(".xlsx") >= 0 && file.indexOf(".") > 1 && file.indexOf("videos") > 1);
+
+        if (!xlsx) return [];
+
+        const result = excelToJson({
+            sourceFile: `${dir}/${xlsx}`,
+            header: {
+                rows: 1
+            },
+            columnToKey: {
+                A: 'id',
+                B: 'file',
+                C: 'hash',
+                D: 'thumbnail',
+                E: 'timestamp',
+                F: 'classification'
+            }
+        });
+
+        const dirPrefix = process.env.DIR_PREFIX || "";
+
+        const response = result.Sheet1.map((item: AnalysisReportInterface) => ({
+            ...item,
+            ...{
+                id: item.id + idOffset,
+                file: item.file.replace(dirPrefix, "/"),
+                type: "video"
             }
         }));
 
@@ -101,8 +149,6 @@ export class AnalysisService {
 
     filteredReport(id: number | string, ids?: string[]) {
         let data: any[] = this.report(id);
-
-        console.log(ids);
 
         if (ids && ids.length > 0)
             data = data.filter(d => ids.indexOf(d.id.toString()) >= 0)

@@ -26,6 +26,7 @@ services:
     volumes:
       - "D:/:/storage"
       - "./results:/results"
+      - "./logs:/m08/M08/log"
     ports:
       - "4545:4545"
     restart: always
