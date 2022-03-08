@@ -11,7 +11,12 @@ export class DirectorySelectorController {
     ) { }
 
     getDir(req: Request, res: Response) {
-        const dirContent = this.directorySelectorService.getDirectoryByPath(req.query.path?.toString());
+        const dirContent = this.directorySelectorService.getDirectoriesListByPath(req.query.path?.toString());
+        res.json(dirContent);
+    }
+
+    fileTypeAvailability(req: Request, res: Response) {
+        const dirContent = this.directorySelectorService.getFileTypeAvailability(req.query.path?.toString());
         res.json(dirContent);
     }
 

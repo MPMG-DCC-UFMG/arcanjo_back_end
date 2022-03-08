@@ -55,6 +55,9 @@ export default class MainRouter {
         this.router.route('/dir')
             .get((req: Request, res: Response) => dirController.getDir(req, res));
 
+        this.router.route('/dir/fileTypes')
+            .get((req: Request, res: Response) => dirController.fileTypeAvailability(req, res));
+
     }
 
     private userRegisterRoutes() {
