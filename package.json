@@ -28,7 +28,8 @@
     "remove-accents": "^0.4.2",
     "sequelize": "^4.42.0",
     "slugify": "^1.6.5",
-    "underscore": "^1.13.2"
+    "underscore": "^1.13.2",
+    "uuid": "^8.3.2"
   },
   "devDependencies": {
     "@types/body-parser": "^1.17.0",
@@ -40,6 +41,7 @@
     "@types/jest": "^27.4.0",
     "@types/jsonwebtoken": "^8.5.8",
     "@types/sequelize": "^4.27.33",
+    "@types/uuid": "^8.3.4",
     "concurrently": "^4.1.0",
     "jest": "^27.4.7",
     "ts-node-dev": "^1.1.8",

@@ -14,6 +14,7 @@ export const User: sequelize.Model<UserInterface, {}> = databaseInstance.define<
         autoIncrement: true,
         primaryKey: true
     },
+    sessionId: sequelize.STRING,
     name: {
         type: sequelize.STRING,
         allowNull: false

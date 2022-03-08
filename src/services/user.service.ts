@@ -1,4 +1,3 @@
-import { Request, Response } from 'express';
 import { User } from '../models/user.model';
 import { ErrorHandling } from '../utils/errorHandling';
 
@@ -62,6 +61,21 @@ export class UserService {
         } catch (err) {
             throw err
         }
+    }
+
+    async saveSession(id: number | string | undefined, sessionId: string | null): Promise<UpdateResponse> {
+        if (id && sessionId) {
+            return this.update(id, { sessionId } as UserInterface);
+        } else {
+            throw "User id and session id are required";
+        }
+    }
+
+    async validateSessionId(user: UserInterface): Promise<boolean> {
+        if (!user.id || !user.sessionId) return false;
+
+        const dbUser = await this.getById(user.id);
+        return user.sessionId === dbUser?.sessionId;
     }
 
     async delete(id: number | string): Promise<DeleteResponse> {

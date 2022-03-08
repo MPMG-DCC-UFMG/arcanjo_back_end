@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { UserService } from '../services/user.service';
 import bcrypt from 'bcrypt';
 import { AuthService } from '../services/auth.service';
+import { v4 as uuidv4 } from 'uuid';
 
 export class AuthController {
 
@@ -25,6 +26,8 @@ export class AuthController {
         }
 
         if (user && bcrypt.compareSync(password, user.password)) {
+            user.sessionId = uuidv4();
+            this.userService.saveSession(user.id, user.sessionId);
             const token = AuthService.generateToken(user);
             res.json({ token });
             return;
