@@ -77,7 +77,9 @@ export class AnalysisController {
         try {
             const response = this.analysisService.filteredReport(req.params.id, req.query.ids ? req.query.ids.toString().split(",") : []);
             const report = await this.analysisService.getById(req.params.id);
-            res.xls(`Relatório ${report?.name}.xlsx`, response);
+            res.xls(`Relatório ${report?.name}.xlsx`, response, {
+                fields: ['id', 'file', 'hash', 'nsfw', 'faces', 'ages', 'children', 'classification', 'timestamp', 'thumbnail', 'type']
+            });
         } catch (err) {
             res.status(400).json(err);
         }
