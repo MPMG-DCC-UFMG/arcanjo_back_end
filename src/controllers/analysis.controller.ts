@@ -75,7 +75,7 @@ export class AnalysisController {
 
     async exportReport(req: Request, res: any) {
         try {
-            const response = this.analysisService.filteredReport(req.params.id, req.query.ids ? req.query.ids.toString().split(",") : []);
+            const response = this.analysisService.filteredReport(req.params.id, req.query.ids ? req.query.ids.toString().split(",") : [], true);
             const report = await this.analysisService.getById(req.params.id);
             res.xls(`Relatório ${report?.name}.xlsx`, response, {
                 fields: ['id', 'file', 'hash', 'nsfw', 'faces', 'ages', 'children', 'classification', 'timestamp', 'thumbnail', 'type']

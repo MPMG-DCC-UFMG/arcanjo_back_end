@@ -61,9 +61,9 @@ export class AnalysisService {
         cliService.processAnalysis(id, user);
     }
 
-    report(id: number | string) {
+    report(id: number | string, replaceThumbPath: boolean = false) {
         const images = this.imageReport(id);
-        const videos = this.videoReport(id, images.length);
+        const videos = this.videoReport(id, images.length, replaceThumbPath);
 
         return [
             ...images,
@@ -109,7 +109,7 @@ export class AnalysisService {
         return response;
     }
 
-    videoReport(id: number | string, idOffset: number = 0) {
+    videoReport(id: number | string, idOffset: number = 0, replaceThumbPath: boolean = false) {
         const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
         const dir = `${resultsDir}/ID_${id}`;
         const files = fs.readdirSync(dir);
@@ -139,6 +139,7 @@ export class AnalysisService {
             ...{
                 id: item.id + idOffset,
                 file: item.file.replace(dirPrefix, "/"),
+                thumbnail: replaceThumbPath ? this.replacedThumbPath(item.thumbnail) : item.thumbnail,
                 type: "video"
             }
         }));
@@ -147,8 +148,13 @@ export class AnalysisService {
         return response;
     }
 
-    filteredReport(id: number | string, ids?: string[]) {
-        let data: any[] = this.report(id);
+    replacedThumbPath(path: string | undefined) {
+        const prefix = process.env.THUMB_PREFIX || '/';
+        return path?.replace("/m08/M08/", prefix);
+    }
+
+    filteredReport(id: number | string, ids?: string[], replaceThumbPath: boolean = false) {
+        let data: any[] = this.report(id, replaceThumbPath);
 
         if (ids && ids.length > 0)
             data = data.filter(d => ids.indexOf(d.id.toString()) >= 0)

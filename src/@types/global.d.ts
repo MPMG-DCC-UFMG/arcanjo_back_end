@@ -19,6 +19,7 @@ declare global {
     ages: string;
     children: number;
     classification: string;
+    thumbnail?: string;
   }
 
   export interface AnalysisInterface {
