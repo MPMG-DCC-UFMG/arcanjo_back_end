@@ -25,6 +25,7 @@ services:
       - DIR_PREFIX=/storage/
       - CLI_DIR=/m08/
       - RESULTS_DIR=/results
+      - THUMB_PREFIX=/caminho/para/pasta/
     volumes:
       - "D:/:/storage"
       - "./results:/results"
