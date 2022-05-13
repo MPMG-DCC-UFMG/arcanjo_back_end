@@ -24,6 +24,7 @@ declare global {
 
   export interface AnalysisInterface {
     id?: number;
+    userId?: number;
     name: string;
     path: string;
     image: boolean;
@@ -34,6 +35,7 @@ declare global {
     age_threshold: number;
     log: string;
     status: string;
+    createdAt: Date
   }
 
 
