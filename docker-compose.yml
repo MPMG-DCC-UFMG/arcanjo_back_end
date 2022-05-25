@@ -8,6 +8,9 @@ services:
       POSTGRES_PASSWORD: 'db_pass'
       POSTGRES_USER: 'db_user'
       POSTGRES_DB: 'db_name'
+      VERSION_DATE: '2.0 - 22/02/2022'
+      TZ: 'GMT-3'
+      PGTZ: 'GMT-3'
     volumes:
       - ./dbdata:/var/lib/postgresql/data
     command: -p 15432
@@ -26,6 +29,7 @@ services:
       - CLI_DIR=/m08/
       - RESULTS_DIR=/results
       - THUMB_PREFIX=/caminho/para/pasta/
+      - TZ=America/Sao_Paulo
     volumes:
       - "D:/:/storage"
       - "./results:/results"
