@@ -123,11 +123,42 @@ export class AnalysisController {
         return "#F1F4F9";
     }
 
+    addBoldText(doc: any, title: string, description: string | number | undefined) {
+        doc
+            .font('Helvetica-Bold')
+            .text(title, { continued: true })
+            .font('Helvetica')
+            .text(description === "" ? "--" : description)
+
+        return doc;
+    }
+
+    getClassificationText(classification: string): string {
+        if (!classification || classification == "['']") {
+            return "Pode não conter menores de idade ou pornografia";
+        } else {
+            return classification;
+        }
+    }
+
+    fixAges(ages: string): string {
+        return ages.replace(/["'\]\[]/g, "");
+    }
+
+    fixType(type: string): string {
+        switch (type) {
+            case "image": return "Imagem";
+            case "video": return "Vídeo";
+            default: return type;
+        }
+    }
+
     async exportPdf(req: Request, res: any) {
         try {
             const { response, report } = await this.getReportData(req, res);
             if (!response) return;
             res.contentType("application/pdf");
+            res.header("Content-Disposition", `inline; filename="Relatório ${report?.name}.pdf`);
 
             const doc = new PDFDocument({ compress: false });
             doc.pipe(res);
@@ -135,6 +166,7 @@ export class AnalysisController {
             doc.image('./assets/logo_mpmg.jpg', 220, 30, { width: 150 })
 
             doc
+                .font('Helvetica')
                 .moveDown()
                 .moveDown()
                 .moveDown()
@@ -142,18 +174,29 @@ export class AnalysisController {
                 .text('Relatório Automático', { align: 'center' })
                 .moveDown()
                 .fontSize(12)
-                .text('Software: Arcanjo - Sistema para identificação de pedofilia em imagens e vídeos')
-                .text(`Versão: ${process.env.VERSION_DATE}`)
+                .text('Software: Arcanjo - Sistema para identificação de pedofilia em imagens e vídeos');
+
+            this.addBoldText(doc, `Versão: `, process.env.VERSION_DATE)
+
                 .moveDown()
                 .moveDown()
-                .text(`Código identificador da análise: ${report?.id}`)
-                .text(`Total de registros processados: ${response.length}`)
-                .text(`Total de imagens processadas: ${response.filter(d => d.type === "image").length}`)
-                .text(`Total de vídeos processados:  ${response.filter(d => d.type === "video").length}`)
-                .text(`Data e hora: ${report?.createdAt.toLocaleString('pt-BR')}`)
+
+            this.addBoldText(doc, `Código identificador da análise: `, report?.id)
+
+            this.addBoldText(doc, `Total de registros processados: `, response.length)
+
+            this.addBoldText(doc, `Total de imagens processadas: `, response.filter(d => d.type === "image").length)
+
+            this.addBoldText(doc, `Total de vídeos processados: `, response.filter(d => d.type === "video").length)
+
+            this.addBoldText(doc, `Data e hora: `, report?.createdAt.toLocaleString('pt-BR'))
+
                 .moveDown()
-                .text(`Usuário: ${response[0]?.name}`)
-                .text(`E-mail: ${response[0].email}`)
+
+            this.addBoldText(doc, `Usuário: `, response[0].name)
+
+            this.addBoldText(doc, `E-mail: `, response[0].email)
+
                 .moveDown()
                 .moveDown()
                 .fontSize(18)
@@ -163,37 +206,34 @@ export class AnalysisController {
                 .text('Os resultados a seguir são fruto de um modelo probabilístico, com o objetivo de auxiliar na triagem de imagens e vídeos. Portanto, podem ocorrer falsos positivos ou falsos negativos. Necessário executar a verificação visual.')
                 .moveDown();
 
-            let start = 480;
             for (const data of response) {
                 doc
                     .moveDown()
                     .rect(doc.x - 10, doc.y - 5, 500, 17).fill(this.getColorByClassification(data.classification)).fill('black');
 
                 if (data.type == "image") {
-                    doc
-                        .text(`ID: ${data.id}`)
-                        .text(`ARQUIVO: ${data.file}`)
-                        .text(`TIPO: ${data.type}`)
-                        .text(`HASH: ${data.hash}`)
-                        .text(`NSFW: ${data.nsfw}`)
-                        .text(`Nº FACES: ${data.faces}`)
-                        .text(`IDADES: ${data.ages}`)
-                        .text(`Nº CRIANÇAS: ${data.children}`)
-                        .text(`CLASSIFICAÇÃO: ${data.classification}`)
+
+                    this.addBoldText(doc, `ID: `, data.id)
+                    this.addBoldText(doc, `Arquivo: `, data.file)
+                    this.addBoldText(doc, `Tipo: `, this.fixType(data.type))
+                    this.addBoldText(doc, `Hash: `, data.hash)
+                    this.addBoldText(doc, `NSFW: `, data.nsfw)
+                    this.addBoldText(doc, `Nº Faces: `, data.faces)
+                    this.addBoldText(doc, `Idades: `, this.fixAges(data.ages))
+                    this.addBoldText(doc, `Nº Crianças: `, data.children)
+                    this.addBoldText(doc, `Classificação: `, this.getClassificationText(data.classification))
                         .moveDown()
                 } else {
                     doc
-                        .text(`ID: ${data.id}`)
-                        .text(`ARQUIVO: ${data.file}`)
-                        .text(`TIPO: ${data.type}`)
-                        .text(`HASH: ${data.hash}`)
-                        .text(`TIMESTAMP: ${data.timestamp}`)
-                        .text(`THUMBNAIL: ${data.thumbnail}`)
-                        .text(`CLASSIFICAÇÃO: ${data.classification}`)
+                    this.addBoldText(doc, `ID: `, data.id)
+                    this.addBoldText(doc, `Arquivo: `, data.file)
+                    this.addBoldText(doc, `Tipo: `, this.fixType(data.type))
+                    this.addBoldText(doc, `Hash: `, data.hash)
+                    this.addBoldText(doc, `Timestamp: `, data.timestamp)
+                    this.addBoldText(doc, `Thumbnail: `, data.thumbnail)
+                    this.addBoldText(doc, `Classificação: `, this.getClassificationText(data.classification))
                         .moveDown()
                 }
-
-                start += 150;
 
             }
 
