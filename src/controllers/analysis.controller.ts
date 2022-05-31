@@ -1,4 +1,5 @@
 import { Request, Response } from 'express';
+import _ from 'lodash';
 import { AnalysisService } from '../services/analysis.service';
 import { UserService } from '../services/user.service';
 
@@ -160,8 +161,7 @@ export class AnalysisController {
             res.contentType("application/pdf");
             res.header("Content-Disposition", `inline; filename="Relatório ${report?.name}.pdf`);
 
-            const doc = new PDFDocument({ compress: false });
-            doc.pipe(res);
+            const doc = new PDFDocument({ bufferPages: true });
 
             doc.image('./assets/logo_mpmg.jpg', 220, 30, { width: 150 })
 
@@ -174,7 +174,8 @@ export class AnalysisController {
                 .text('Relatório Automático', { align: 'center' })
                 .moveDown()
                 .fontSize(12)
-                .text('Software: Arcanjo - Sistema para identificação de pedofilia em imagens e vídeos');
+
+            this.addBoldText(doc, 'Software: ', 'Arcanjo - Sistema para identificação de pedofilia em imagens e vídeos')
 
             this.addBoldText(doc, `Versão: `, process.env.VERSION_DATE)
 
@@ -183,11 +184,13 @@ export class AnalysisController {
 
             this.addBoldText(doc, `Código identificador da análise: `, report?.id)
 
-            this.addBoldText(doc, `Total de registros processados: `, response.length)
 
-            this.addBoldText(doc, `Total de imagens processadas: `, response.filter(d => d.type === "image").length)
+            const imageCount = response.filter(d => d.type === "image").length;
+            const videoCount = _.uniqBy(response.filter(d => d.type === "video"), 'hash').length;
 
-            this.addBoldText(doc, `Total de vídeos processados: `, response.filter(d => d.type === "video").length)
+            this.addBoldText(doc, `Total de registros processados: `, (imageCount + videoCount))
+            this.addBoldText(doc, `Total de imagens processadas: `, imageCount)
+            this.addBoldText(doc, `Total de vídeos processados: `, videoCount)
 
             this.addBoldText(doc, `Data e hora: `, report?.createdAt.toLocaleString('pt-BR'))
 
@@ -237,7 +240,29 @@ export class AnalysisController {
 
             }
 
+            // see the range of buffered pages
+            const range = doc.bufferedPageRange(); // => { start: 0, count: 2 }
+            const start = range.start;
+            const end = range.start + range.count;
+            const now = new Date().toLocaleString('pt-BR');
+            for (let i = start; i < end; i++) {
+                doc.switchToPage(i)
+                const originalMargin = doc.page.margins;
+                doc.page.margins = {
+                    top: 0,
+                    bottom: 0,
+                    left: 0,
+                    right: 0
+                };
+                doc.text(`Página ${i + 1} de ${range.count}`, 475, 750);
+                doc.text(`Arcanjo - ${now}`, originalMargin.left, 750);
+            }
+
+            // // manually flush pages that have been buffered
+            doc.flushPages();
+
             doc.end();
+            doc.pipe(res);
 
 
         } catch (err) {
