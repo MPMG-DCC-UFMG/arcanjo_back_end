@@ -177,7 +177,10 @@ export class AnalysisService {
     }
 
     getLogFromFile(id: string | number): string {
-        const dir = path.resolve(`results/ID_${id}`);
+
+        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
+        const dir = path.resolve(`${resultsDir}/ID_${id}`);
+
         if (!fs.existsSync(dir)) return "";
 
         const files = fs.readdirSync(dir);
