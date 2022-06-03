@@ -3,6 +3,7 @@ import { Analysis } from '../models/analysis.model';
 import { ErrorHandling } from '../utils/errorHandling';
 import { CliService } from './cli.service';
 import fs from 'fs';
+import * as path from 'path'
 
 const excelToJson = require('convert-excel-to-json');
 
@@ -20,9 +21,22 @@ export class AnalysisService {
 
     async getById(id: number | string): Promise<AnalysisInterface | null> {
         try {
-            return await Analysis.findByPk(id);
+            const data = await Analysis.findByPk(id);
+            if (data && data.id) {
+                data.log = this.getLogFromFile(data.id);
+                await this.saveIfLogCompleted(data);
+                return data;
+            } else {
+                return null
+            }
         } catch (err) {
             throw err
+        }
+    }
+
+    async saveIfLogCompleted(data: AnalysisInterface) {
+        if (data.log.indexOf("Exportando dados para") >= 0 && data.status != 'completed' && data.id) {
+            Analysis.update({ status: "completed" }, { where: { id: data.id } })
         }
     }
 
@@ -160,5 +174,18 @@ export class AnalysisService {
             data = data.filter(d => ids.indexOf(d.id.toString()) >= 0)
 
         return data;
+    }
+
+    getLogFromFile(id: string | number): string {
+        const dir = path.resolve(`results/ID_${id}`);
+        if (!fs.existsSync(dir)) return "";
+
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            if (file.indexOf("log_ID_") >= 0) {
+                return fs.readFileSync(`${dir}/${file}`, { encoding: "utf-8" });
+            }
+        }
+        return "";
     }
 }
