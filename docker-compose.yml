@@ -27,6 +27,7 @@ services:
       - DIR_PREFIX=/storage/
       - CLI_DIR=/m08/
       - RESULTS_DIR=/results
+      - LOGS_DIR=/m08/M08/log
       - THUMB_PREFIX=/caminho/para/pasta/
       - TZ=America/Sao_Paulo
       - VERSION_DATE=2.0 - 22/02/2022

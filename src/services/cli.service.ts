@@ -8,22 +8,22 @@ const cliDir = process.env.CLI_DIR;
 
 export class CliService {
 
-    DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"D:{PATH}:/m08/storage\"", "-v",path.resolve(__dirname + "../../../results") + ":/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results\""];
-    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`, 
-        "-p", "{PATH}", 
-        "-i", "{ID}", 
-        "-t", "{TYPE}", 
-        "--age", "{AGE}", 
-        "--face", "{FACE}", 
-        "--child", "{CHILD}", 
-        "--nsfw", "{NSFW}", 
-        "--user", "\"{USER}\"", 
+    DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"D:{PATH}:/m08/storage\"", "-v", path.resolve(__dirname + "../../../logs") + ":/m08/M08/log", "-v", path.resolve(__dirname + "../../../results") + ":/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results\""];
+    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`,
+        "-p", "{PATH}",
+        "-i", "{ID}",
+        "-t", "{TYPE}",
+        "--age", "{AGE}",
+        "--face", "{FACE}",
+        "--child", "{CHILD}",
+        "--nsfw", "{NSFW}",
+        "--user", "\"{USER}\"",
         "-o", resultsDir
     ];
 
     constructor(
         private analysisService = new AnalysisService()
-    ) { 
+    ) {
         console.log(path.resolve(__dirname + "../../../results"));
     }
 
@@ -50,7 +50,11 @@ export class CliService {
             );
 
             this.changeAnalysisStatus(id, "processing")
-            this.runCommand(command, (log: string) => this.saveAnalysisLog(id, log), () => this.changeAnalysisStatus(id, "completed"));
+            this.runCommand(command, 
+                (log: string) => this.saveAnalysisLog(id, log), 
+                () => this.changeAnalysisStatus(id, "completed"),
+                () => this.changeAnalysisStatus(id, "error"),
+            );
         }
     }
 
@@ -72,7 +76,7 @@ export class CliService {
         this.analysisService.update(id, { log })
     }
 
-    runCommand(command: string[], updateLog?: (log: string) => void, finishCallback?: () => void) {
+    runCommand(command: string[], updateLog?: (log: string) => void, finishCallback?: () => void, errorCallback?: () => void) {
         console.log(`Running command: ${command.join(" ")}`);
         const execution = exec(command.join(" "));
 
@@ -81,8 +85,20 @@ export class CliService {
             if (updateLog) updateLog(data);
         });
 
+        execution.on('close', function (code) {
+            if (code === 0) {
+                if(finishCallback) finishCallback();
+            } else {
+                if(errorCallback) errorCallback();
+            }
+        })
+
+        execution.on('error', function (error) {
+            console.log(`error: ${error.message}`);
+        })
+
         execution.on('exit', function () {
-            if (finishCallback) finishCallback();
+            console.log(`Execution exited`)
         })
     }
 }

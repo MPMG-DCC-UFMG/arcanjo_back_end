@@ -178,14 +178,14 @@ export class AnalysisService {
 
     getLogFromFile(id: string | number): string {
 
-        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
-        const dir = path.resolve(`${resultsDir}/ID_${id}`);
+        const logsDir = process.env.LOGS_DIR || `${__dirname}/../../logs`;
+        const dir = path.resolve(`${logsDir}/ID_${id}`);
 
         if (!fs.existsSync(dir)) return "";
 
         const files = fs.readdirSync(dir);
         for (const file of files) {
-            if (file.indexOf("log_ID_") >= 0) {
+            if (file.indexOf("log_") >= 0) {
                 return fs.readFileSync(`${dir}/${file}`, { encoding: "utf-8" });
             }
         }

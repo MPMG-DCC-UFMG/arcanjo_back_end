@@ -49,7 +49,7 @@ export const Analysis: sequelize.Model<AnalysisInterface, {}> = databaseInstance
         type: sequelize.STRING,
         defaultValue: 'created',
         validate: {
-            isIn: [['created', 'processing', 'completed']]
+            isIn: [['created', 'processing', 'completed', 'error']]
         }
     }
 }, {
