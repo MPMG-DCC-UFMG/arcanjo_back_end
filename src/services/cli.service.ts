@@ -89,7 +89,7 @@ export class CliService {
             if (code === 0) {
                 if(finishCallback) finishCallback();
             } else {
-                if(errorCallback) errorCallback();
+                // if(errorCallback) errorCallback();
             }
         })
 
