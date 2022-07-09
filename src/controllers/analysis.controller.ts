@@ -81,7 +81,7 @@ export class AnalysisController {
     }
 
     async getReportData(req: Request, res: any) {
-        let response = this.analysisService.filteredReport(req.params.id, req.query.ids ? req.query.ids.toString().split(",") : [], true);
+        let response = this.analysisService.filteredReport(req.params.id, req.body.ids ? req.body.ids.toString().split(",") : [], true);
         const report = await this.analysisService.getById(req.params.id);
 
         if (!report) {

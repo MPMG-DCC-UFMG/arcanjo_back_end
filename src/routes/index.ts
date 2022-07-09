@@ -45,10 +45,10 @@ export default class MainRouter {
 
 
         this.router.route('/analysis/:id/report/download')
-            .get((req: Request, res: Response) => analysisController.exportReport(req, res))
+            .post((req: Request, res: Response) => analysisController.exportReport(req, res))
 
         this.router.route('/analysis/:id/report/pdf')
-            .get((req: Request, res: Response) => analysisController.exportPdf(req, res))
+            .post((req: Request, res: Response) => analysisController.exportPdf(req, res))
 
     }
 
