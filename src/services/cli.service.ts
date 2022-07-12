@@ -10,7 +10,7 @@ export class CliService {
 
     DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"D:{PATH}:/m08/storage\"", "-v", path.resolve(__dirname + "../../../logs") + ":/m08/M08/log", "-v", path.resolve(__dirname + "../../../results") + ":/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results\""];
     CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`,
-        "-p", "{PATH}",
+        "-p", "\"{PATH}\"",
         "-i", "{ID}",
         "-t", "{TYPE}",
         "--age", "{AGE}",
