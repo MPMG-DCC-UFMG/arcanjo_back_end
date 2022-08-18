@@ -8,8 +8,21 @@ const cliDir = process.env.CLI_DIR;
 
 export class CliService {
 
-    DOCKER_COMMAND: string[] = ["docker", "run", "--rm", "-v", "\"D:{PATH}:/m08/storage\"", "-v", path.resolve(__dirname + "../../../logs") + ":/m08/M08/log", "-v", path.resolve(__dirname + "../../../results") + ":/m08/results", "arcanjo-cli", "bash", "-c", "\"python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results\""];
-    CLI_COMMAND: string[] = ["cd /m08/ &&", "python3", `${cliDir}run.py`,
+    DOCKER_COMMAND: string[] = ["docker", "run", "--rm",
+        "-v", "\"C:{PATH}:/m08/storage\"",
+        "-v", path.resolve(__dirname + "../../../logs") + ":/m08/M08/log",
+        "-v", path.resolve(__dirname + "../../../results") + ":/m08/results",
+        "arcanjo-cli",
+        "bash", "-c",
+        "\"mkdir '/m08/M08/log/{ID}';",
+        "python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results",
+        "1> '/m08/M08/log/{ID}/log_stdout.txt'",
+        "2> '/m08/M08/log/{ID}/log_stderr.txt'",
+        "\""
+    ];
+    CLI_COMMAND: string[] = ["cd /m08/ &&",
+        "mkdir \"/m08/M08/log/{ID}\";",
+        "python3", `${cliDir}run.py`,
         "-p", "\"{PATH}\"",
         "-i", "{ID}",
         "-t", "{TYPE}",
@@ -18,7 +31,10 @@ export class CliService {
         "--child", "{CHILD}",
         "--nsfw", "{NSFW}",
         "--user", "\"{USER}\"",
-        "-o", resultsDir
+        "-o", resultsDir,
+        "1> \"M08/log/{ID}/log_stdout.txt\"",
+        "2> \"M08/log/{ID}/log_stderr.txt\"",
+        "&"
     ];
 
     constructor(
@@ -50,12 +66,20 @@ export class CliService {
             );
 
             this.changeAnalysisStatus(id, "processing")
-            this.runCommand(command, 
-                (log: string) => this.saveAnalysisLog(id, log), 
+            this.runCommand(command,
+                (log: string) => this.saveAnalysisLog(id, log),
                 () => this.changeAnalysisStatus(id, "completed"),
                 () => this.changeAnalysisStatus(id, "error"),
             );
         }
+    }
+
+    async cancelProcess(id: number | string, pid: string) {
+        const command: string[] = [
+            "kill", "-9", pid
+        ];
+        this.runCommand(command);
+        this.changeAnalysisStatus(id, "canceled")
     }
 
     getType(analysis: AnalysisInterface): "imagens" | "videos" | "todos" {
@@ -87,7 +111,7 @@ export class CliService {
 
         execution.on('close', function (code) {
             if (code === 0) {
-                if(finishCallback) finishCallback();
+                if (finishCallback) finishCallback();
             } else {
                 // if(errorCallback) errorCallback();
             }

@@ -21,21 +21,23 @@ export class AnalysisService {
 
     async getById(id: number | string): Promise<AnalysisInterface | null> {
         try {
-            const data = await Analysis.findByPk(id);
+            const data:any = await Analysis.findByPk(id);
             if (data && data.id) {
-                data.log = this.getLogFromFile(data.id);
+                data.dataValues.log = this.getLogFromFile(data.id);
+                data.dataValues.pid = this.getPidFromFile(data.id);
                 await this.saveIfLogCompleted(data);
                 return data;
             } else {
                 return null
             }
         } catch (err) {
+            console.log(err);
             throw err
         }
     }
 
-    async saveIfLogCompleted(data: AnalysisInterface) {
-        if (data.log.indexOf("Exportando dados para") >= 0 && data.status != 'completed' && data.id) {
+    async saveIfLogCompleted(data: any) {
+        if (data.dataValues.log.indexOf("Exportando dados para") >= 0 && data.status != 'completed' && data.id) {
             Analysis.update({ status: "completed" }, { where: { id: data.id } })
         }
     }
@@ -73,6 +75,12 @@ export class AnalysisService {
     async process(id: number | string, user: string) {
         const cliService = new CliService();
         cliService.processAnalysis(id, user);
+    }
+
+    async cancelProcess(id: number | string) {
+        const pid = this.getPidFromFile(id);
+        const cliService = new CliService();
+        cliService.cancelProcess(id, pid);
     }
 
     report(id: number | string, replaceThumbPath: boolean = false) {
@@ -186,6 +194,22 @@ export class AnalysisService {
         const files = fs.readdirSync(dir);
         for (const file of files) {
             if (file.indexOf("log_") >= 0) {
+                return fs.readFileSync(`${dir}/${file}`, { encoding: "utf-8" });
+            }
+        }
+        return "";
+    }
+
+    getPidFromFile(id: string | number): string {
+
+        const logsDir = process.env.LOGS_DIR || `${__dirname}/../../logs`;
+        const dir = path.resolve(`${logsDir}/ID_${id}`);
+
+        if (!fs.existsSync(dir)) return "";
+
+        const files = fs.readdirSync(dir);
+        for (const file of files) {
+            if (file === ".pid.txt") {
                 return fs.readFileSync(`${dir}/${file}`, { encoding: "utf-8" });
             }
         }

@@ -25,9 +25,9 @@ export class AnalysisController {
 
     async read(req: Request, res: Response) {
         try {
-            const user = await this.analysisService.getById(req.params.id);
-            if (user)
-                res.json(user);
+            const data = await this.analysisService.getById(req.params.id);
+            if (data)
+                res.json(data);
             else
                 res.sendStatus(404)
         } catch (err) {
@@ -65,6 +65,15 @@ export class AnalysisController {
     async process(req: Request, res: Response) {
         try {
             const response = this.analysisService.process(req.params.id, req.body.user.name);
+            res.sendStatus(200);
+        } catch (err) {
+            res.status(400).json(err);
+        }
+    }
+
+    async cancelProcess(req: Request, res: Response) {
+        try {
+            const pid = this.analysisService.cancelProcess(req.params.id);
             res.sendStatus(200);
         } catch (err) {
             res.status(400).json(err);

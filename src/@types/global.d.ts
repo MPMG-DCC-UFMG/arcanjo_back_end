@@ -34,6 +34,7 @@ declare global {
     child_threshold: number;
     age_threshold: number;
     log: string;
+    pid: string;
     status: string;
     createdAt: Date
   }

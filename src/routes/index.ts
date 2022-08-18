@@ -96,6 +96,7 @@ export default class MainRouter {
 
         this.router.route('/analysis/:id/process')
             .post((req: Request, res: Response) => analysisController.process(req, res))
+            .delete((req: Request, res: Response) => analysisController.cancelProcess(req, res))
 
         this.router.route('/analysis/:id/report')
             .get((req: Request, res: Response) => analysisController.report(req, res))
