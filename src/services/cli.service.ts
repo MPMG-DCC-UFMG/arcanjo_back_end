@@ -68,7 +68,7 @@ export class CliService {
             this.changeAnalysisStatus(id, "processing")
             this.runCommand(command,
                 (log: string) => this.saveAnalysisLog(id, log),
-                () => this.changeAnalysisStatus(id, "completed"),
+                undefined, //() => this.changeAnalysisStatus(id, "completed"),
                 () => this.changeAnalysisStatus(id, "error"),
             );
         }
