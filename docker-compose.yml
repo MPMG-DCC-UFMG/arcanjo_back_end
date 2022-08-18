@@ -32,7 +32,7 @@ services:
       - TZ=America/Sao_Paulo
       - VERSION_DATE=2.0 - 22/02/2022
     volumes:
-      - "D:/:/storage"
+      - "C:/:/storage"
       - "./results:/results"
       - "./logs:/m08/M08/log"
     ports:

@@ -32,8 +32,8 @@ export class CliService {
         "--nsfw", "{NSFW}",
         "--user", "\"{USER}\"",
         "-o", resultsDir,
-        "1> \"M08/log/{ID}/log_stdout.txt\"",
-        "2> \"M08/log/{ID}/log_stderr.txt\"",
+        "1> \"/m08/M08/log/{ID}/log_stdout.txt\"",
+        "2> \"/m08/M08/log/{ID}/log_stderr.txt\"",
         "&"
     ];
 
