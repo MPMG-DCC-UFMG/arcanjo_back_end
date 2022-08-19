@@ -150,7 +150,10 @@ export class AnalysisService {
                 C: 'hash',
                 D: 'thumbnail',
                 E: 'timestamp',
-                F: 'classification'
+                F: 'nsfw',
+                G: 'children',
+                H: 'faces',
+                I: 'classification'
             }
         });
 
