@@ -21,7 +21,7 @@ export class AnalysisService {
 
     async getById(id: number | string): Promise<AnalysisInterface | null> {
         try {
-            const data:any = await Analysis.findByPk(id);
+            const data: any = await Analysis.findByPk(id);
             if (data && data.id) {
                 data.dataValues.log = this.getLogFromFile(data.id);
                 data.dataValues.pid = this.getPidFromFile(data.id);
@@ -216,6 +216,18 @@ export class AnalysisService {
                 return fs.readFileSync(`${dir}/${file}`, { encoding: "utf-8" });
             }
         }
+        return "";
+    }
+
+    getFromResults(id: string | number, fileName: string): string {
+
+        const resultsDir = process.env.RESULTS_DIR || `${__dirname}/../../results`;
+        const dir = path.resolve(`${resultsDir}/ID_${id}`);
+
+        if (fs.existsSync(dir) && fs.existsSync(`${dir}/${fileName}`)) {
+            return fs.readFileSync(`${dir}/${fileName}`, { encoding: "utf-8" });
+        }
+
         return "";
     }
 }

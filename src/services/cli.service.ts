@@ -15,6 +15,8 @@ export class CliService {
         "arcanjo-cli",
         "bash", "-c",
         "\"mkdir '/m08/M08/log/{ID}';",
+        "mkdir '/m08/results/{ID}';",
+        "cd /m08/;",
         "python3 run.py -p /m08/storage -i {ID} -t {TYPE} --age {AGE} --face {FACE} --child {CHILD} --nsfw {NSFW} --user '{USER}' -o /m08/results",
         "1> '/m08/M08/log/{ID}/log_stdout.txt'",
         "2> '/m08/M08/log/{ID}/log_stderr.txt'",
@@ -22,6 +24,7 @@ export class CliService {
     ];
     CLI_COMMAND: string[] = ["cd /m08/ &&",
         "mkdir \"/m08/M08/log/{ID}\";",
+        "mkdir \"/m08/results/{ID}\";",
         "python3", `${cliDir}run.py`,
         "-p", "\"{PATH}\"",
         "-i", "{ID}",

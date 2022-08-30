@@ -163,6 +163,67 @@ export class AnalysisController {
         }
     }
 
+    getStatistic(id: number, response: any[]) {
+        const statistics: (string | number)[][] = [];
+
+        const txt = this.analysisService.getFromResults(id, "estatisticas.txt");
+        if (txt) {
+            const vars: any = txt.split("\n").reduce((acc, t) => {
+                const v = t.split("=");
+                return {
+                    ...acc,
+                    [v[0]]: v[1]
+                };
+            }, {})
+
+            statistics.push([`Total de registros: `, vars.total_arquivos]);
+            statistics.push([`Total de registros processados: `, vars.total_arquivos_processados]);
+
+            statistics.push([`Total de imagens: `, vars.total_arquivos_imagem]);
+            statistics.push([`Total de imagens únicas processadas: `, vars.total_arquivos_unicos_imagem]);
+            statistics.push([`Total de imagens replicadas: `, vars.total_arquivos_replicados_imagem]);
+
+            statistics.push([`Total de vídeos: `, vars.total_arquivos_video]);
+            statistics.push([`Total de vídeos únicos processados: `, vars.total_arquivos_unicos_video]);
+            statistics.push([`Total de vídeos replicados: `, vars.total_arquivos_replicados_video]);
+
+        } else {
+            const imageCount = response.filter(d => d.type === "image").length;
+            const videoCount = _.uniqBy(response.filter(d => d.type === "video"), 'hash').length;
+
+            statistics.push([`Total de registros processados: `, (imageCount + videoCount)]);
+            statistics.push([`Total de imagens processadas: `, imageCount]);
+            statistics.push([`Total de vídeos processados: `, videoCount]);
+        }
+
+        return statistics;
+    }
+
+    getDuplicated(id: number | null | undefined): any[] {
+        const duplicated = this.analysisService.getFromResults(id || 0, "arquivos_replicados.csv");
+        if (!duplicated) return [];
+
+        const vars: any[] = duplicated.split("\n").slice(1).map((t) => {
+            const v = t.split(";");
+            return {
+                type: v[0],
+                hash: v[1],
+                files: v[2]
+            };
+        })
+
+        return vars;
+    }
+
+    getFilename(duplicatedList: any[], hash: string, filename: string) {
+        const item = duplicatedList.find((item: any) => item.hash === hash);
+        if (item) {
+            return item.files;
+        } else {
+            return `"${filename}"`;
+        }
+    }
+
     async exportPdf(req: Request, res: any) {
         try {
             const { response, report } = await this.getReportData(req, res);
@@ -193,13 +254,10 @@ export class AnalysisController {
 
             this.addBoldText(doc, `Código identificador da análise: `, report?.id)
 
-
-            const imageCount = response.filter(d => d.type === "image").length;
-            const videoCount = _.uniqBy(response.filter(d => d.type === "video"), 'hash').length;
-
-            this.addBoldText(doc, `Total de registros processados: `, (imageCount + videoCount))
-            this.addBoldText(doc, `Total de imagens processadas: `, imageCount)
-            this.addBoldText(doc, `Total de vídeos processados: `, videoCount)
+            const statistics = this.getStatistic(report?.id || 0, response);
+            for (const statistic of statistics) {
+                this.addBoldText(doc, statistic[0].toString(), statistic[1]);
+            }
 
             this.addBoldText(doc, `Data e hora: `, report?.createdAt.toLocaleString('pt-BR'))
 
@@ -218,6 +276,8 @@ export class AnalysisController {
                 .text('Os resultados a seguir são fruto de um modelo probabilístico, com o objetivo de auxiliar na triagem de imagens e vídeos. Portanto, podem ocorrer falsos positivos ou falsos negativos. Necessário executar a verificação visual.')
                 .moveDown();
 
+            const duplicated = this.getDuplicated(report?.id);
+
             for (const data of response) {
                 doc
                     .moveDown()
@@ -226,7 +286,7 @@ export class AnalysisController {
                 if (data.type == "image") {
 
                     this.addBoldText(doc, `ID: `, data.id)
-                    this.addBoldText(doc, `Arquivo: `, data.file)
+                    this.addBoldText(doc, `Arquivo: `, this.getFilename(duplicated, data.hash, data.file))
                     this.addBoldText(doc, `Tipo: `, this.fixType(data.type))
                     this.addBoldText(doc, `Hash: `, data.hash)
                     this.addBoldText(doc, `NSFW: `, data.nsfw)
@@ -238,7 +298,7 @@ export class AnalysisController {
                 } else {
                     doc
                     this.addBoldText(doc, `ID: `, data.id)
-                    this.addBoldText(doc, `Arquivo: `, data.file)
+                    this.addBoldText(doc, `Arquivo: `, this.getFilename(duplicated, data.hash, data.file))
                     this.addBoldText(doc, `Tipo: `, this.fixType(data.type))
                     this.addBoldText(doc, `Hash: `, data.hash)
                     this.addBoldText(doc, `Timestamp: `, data.timestamp)
