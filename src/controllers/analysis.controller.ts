@@ -9,6 +9,13 @@ const PDFDocument = require('pdfkit');
 
 export class AnalysisController {
 
+    CLASSIFICATION_COLORS = {
+        NONE: "#F1F4F9",
+        CHILD: "#DBEAFE",
+        PORN: "#FFEDD5",
+        CHILD_PORN: "#F1F4F9"
+    }
+
     constructor(
         private analysisService: AnalysisService = new AnalysisService(),
         private userService: UserService = new UserService(),
@@ -124,13 +131,18 @@ export class AnalysisController {
     }
 
     getColorByClassification(classification: string) {
-        if (classification.indexOf("pornografia") >= 0 && classification.indexOf("menores de idade") >= 0)
-            return "#FECACA";
+        if (classification.indexOf("não") >= 0)
+            return this.CLASSIFICATION_COLORS.NONE;
+        if (
+            classification.indexOf("pornografia") >= 0
+            && classification.indexOf("menores de idade") >= 0
+        )
+            return this.CLASSIFICATION_COLORS.CHILD_PORN;
         if (classification.indexOf("pornografia") >= 0)
-            return "#FFEDD5";
+            return this.CLASSIFICATION_COLORS.PORN;
         if (classification.indexOf("menores de idade") >= 0)
-            return "#DBEAFE";
-        return "#F1F4F9";
+            return this.CLASSIFICATION_COLORS.CHILD;
+        return this.CLASSIFICATION_COLORS.NONE;
     }
 
     addBoldText(doc: any, title: string, description: string | number | undefined) {
